@@ -1,5 +1,4 @@
-fastapi
 pydantic
 celery
 SQLAlchemy
-uvicorn[standard]
+psutil
