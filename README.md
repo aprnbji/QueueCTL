@@ -1,6 +1,8 @@
-## Quick Start
+# Demo
+https://github.com/user-attachments/assets/6050c5e2-8237-4ca5-a3cb-c828825893c8
+# Quick Start
 
-### 1. Initialize Environment
+## 1. Initialize Environment
 
 ```bash
 python -m venv .venv
@@ -8,7 +10,7 @@ source .venv/bin/activate
 pip install -r requirements.txt
 ```
 
-### Environment Configuration
+## Environment Configuration
 
 Create a `.env` file in the project root (see configuration below).
 
@@ -26,7 +28,7 @@ BACKEND_URL=db+sqlite:///db.sqlite
 
 ---
 
-### 2. Start Workers
+## 2. Start Workers
 
 Start one or more Celery workers:
 
@@ -54,7 +56,7 @@ python main.py worker stop worker_1
 
 ---
 
-### 3. Submit Jobs
+## 3. Submit Jobs
 
 Queue a new job:
 
@@ -70,7 +72,7 @@ python main.py job enqueue --job fail --desc "This will trigger retries"
 
 ---
 
-### 4. Monitor Jobs
+## 4. Monitor Jobs
 
 List all jobs:
 
@@ -92,23 +94,23 @@ python main.py job status <task_id>
 
 ---
 
-### 5. Dead Letter Queue (DLQ)
+## 5. Dead Letter Queue (DLQ)
 
 List failed jobs:
 
 ```bash
-python main.py job dlq list
+python main.py job dlq-list
 ```
 
 Retry a specific DLQ job:
 
 ```bash
-python main.py job dlq retry <task_id>
+python main.py job dlq-retry <task_id>
 ```
 
 ---
 
-### 6. Configuration Management
+## 6. Configuration Management
 
 View or change runtime retry behavior directly via CLI.
 
@@ -126,8 +128,25 @@ python main.py config set backoff_base 3
 
 ---
 
+# Architecture Overview
 
-## My Learning Experience
+
+| Component                     | Role                                                   |
+| ----------------------------- | ------------------------------------------------------ |
+| **Celery**                    | Manages background jobs and retries.                   |
+| **SQLite (Broker + Backend)** | Stores messages, results, and job info.                |
+| **JobStore (SQLite)**         | Persists job states and failed jobs (DLQ).             |
+| **DLQ (Dead Letter Queue)**   | Keeps jobs that failed too many times.                 |
+| **Workers**                   | Run jobs in the background.                            |
+
+---
+
+## Flow
+
+``CLI input`` -> ``submit_job()`` -> ``Celery Broker (SQLite)`` -> ``Worker → process_job_task()`` -> ``JobStore (updates status)`` -> ``If fails → Retry (exponential backoff)`` -> ``If max retries reached`` → ``DLQ``
+
+
+# My Learning Experience
 
 I thought this was a great exercise. I hadn’t had the opportunity to implement workers and jobs and the like in of my other projects. While looking for the ideal aproach to queue management and the sort, I came to settle on celery, which is used in many production ready backends.
 
