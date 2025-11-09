@@ -1,1 +1,6 @@
 .venv/
+db.sqlite
+jobs.sqlite
+workers.json
+logs/
+apps/__pycache__
