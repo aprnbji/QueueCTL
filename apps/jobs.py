@@ -1,7 +1,7 @@
+from kombu import Queue, Connection, Producer
 import time, json, sqlite3, uuid
-from datetime import datetime
-from kombu import Queue, Exchange, Connection, Producer
 from pydantic import BaseModel
+from datetime import datetime
 from pathlib import Path
 
 from apps.config import (
@@ -10,9 +10,7 @@ from apps.config import (
     RETRY_BACKOFF_BASE, MAX_RETRY_DELAY,
 )
 
-# ---------------------------------------------------------------------------
 # DATABASE / JOB STORE
-# ---------------------------------------------------------------------------
 
 DB_FILE = Path("jobs.sqlite")
 
@@ -90,9 +88,7 @@ class JobStore:
 
 job_store = JobStore()
 
-# ---------------------------------------------------------------------------
 # TASKS
-# ---------------------------------------------------------------------------
 
 @celery_app.task(bind=True, max_retries=MAX_RETRIES, default_retry_delay=DEFAULT_RETRY_DELAY)
 def process_job_task(self, job_name: str, description: str):
@@ -148,9 +144,7 @@ def process_job_task(self, job_name: str, description: str):
             job_store.update_job(task_id, "RETRY", {"error": str(exc), "retry_in": delay})
             raise self.retry(exc=exc, countdown=delay)
 
-# ---------------------------------------------------------------------------
-# JOB MANAGEMENT API
-# ---------------------------------------------------------------------------
+# JOB MANAGEMENT
 
 class JobRequest(BaseModel):
     job_name: str
